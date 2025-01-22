@@ -32,19 +32,24 @@ void enviarMensagemBT(const String &mensagem) {
   BTSerial.print("\n");
 }
 
-// Funções buzzer
+// Sismo: tom mais grave
 void buzzerSomSismo() {
-  // Tom: Grave 
-  tone(BUZZER_PIN, 400, 500); 
-  delay(600);
-  noTone(BUZZER_PIN);
+  unsigned long startTime = millis();
+  while (millis() - startTime < 5000) {
+    tone(BUZZER_PIN, 400, 500); // Tocar durante 500 ms a 400 Hz
+    delay(600);                 // Esperar 600 ms (durante esse período não há tom)
+    noTone(BUZZER_PIN);
+  }
 }
 
+// Fogo: tom mais agudo
 void buzzerSomFogo() {
-  // Tom: Agudo
-  tone(BUZZER_PIN, 800, 500);
-  delay(600);
-  noTone(BUZZER_PIN);
+  unsigned long startTime = millis();
+  while (millis() - startTime < 5000) {
+    tone(BUZZER_PIN, 800, 500); // Tocar durante 500 ms a 800 Hz
+    delay(600);                 // Esperar 600 ms
+    noTone(BUZZER_PIN);
+  }
 }
 
 // Ligar de Forma Gradual
@@ -57,7 +62,7 @@ void ligarLuzes() {
   enviarMensagemBT("Luzes ON");
 }
 
-// Ligar de Forma Gradual
+// Desligar de Forma Gradual
 void desligarLuzes() {
   for (int i = 4; i >= 0; i--) {
     digitalWrite(LED_PINS[i], LOW);
@@ -74,7 +79,7 @@ void setup() {
   
   pinMode(BUZZER_PIN, OUTPUT);
   
-  //Iniciar os varios LEDs
+  // Iniciar os vários LEDs
   for (int i = 0; i < 5; i++) {
     pinMode(LED_PINS[i], OUTPUT);
     digitalWrite(LED_PINS[i], LOW);
@@ -93,9 +98,10 @@ void setup() {
 }
 
 void loop() {
-  //Leitura LDR
+  // Leitura LDR
   int ldrValue = analogRead(LDR_PIN);
   
+  // Controlar luzes
   if (ldrValue < LUZ_THRESHOLD && !luzesLigadas) {
     ligarLuzes();
   } 
@@ -103,31 +109,33 @@ void loop() {
     desligarLuzes();
   }
   
-  //Leitura de Chama
+  // Leitura de Chama
   int flameValue = digitalRead(FLAME_SENSOR_PIN);
+  // Assumindo que LOW = fogo detetado (depende do sensor)
   if (flameValue == LOW) {
     if (!fogoDetectado) {
       fogoDetectado = true;
       Serial.println("Fogo detectado!");
       enviarMensagemBT("Fogo Detectado!");
-      buzzerSomFogo();
+      buzzerSomFogo(); // Agora a “sirene” de 5s
     }
   } else {
     fogoDetectado = false;
   }
   
-  //Leitura de Vibração
+  // Leitura de Vibração
   int vibValue = digitalRead(VIB_SENSOR_PIN);
+  // Assumindo HIGH = sismo detetado (depende do sensor)
   if (vibValue == HIGH) {
     if (!sismoDetectado) {
       sismoDetectado = true;
       Serial.println("Possivel sismo detectado!");
       enviarMensagemBT("Sismo Detectado!");
-      buzzerSomSismo();
+      buzzerSomSismo(); // Agora a “sirene” de 5s
     }
   } else {
     sismoDetectado = false;
   }
   
-  delay(200); // Estabilidade de Leitura
+  delay(200); // Pequena pausa para estabilidade de leitura
 }
