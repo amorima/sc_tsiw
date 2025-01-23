@@ -24,7 +24,6 @@ bool fogoDetectado        = false;
 // Limites
 const int LUZ_THRESHOLD   = 500; // LDR
 const int VIB_THRESHOLD   = 100;
-const int DEBOUNCE_DELAY  = 100; // Evitar leituras falsas
 
 // Função para enviar mensagens Bluetooth
 void enviarMensagemBT(const String &mensagem) {
@@ -104,14 +103,18 @@ void loop() {
   // Controlar luzes
   if (ldrValue < LUZ_THRESHOLD && !luzesLigadas) {
     ligarLuzes();
+    enviarMensagemBT("Luzes ON");
+    Serial.println("Luzes ON");
   } 
   else if (ldrValue >= LUZ_THRESHOLD && luzesLigadas) {
     desligarLuzes();
+    enviarMensagemBT("Luzes OFF");
+    Serial.println("Luzes OFF");  
   }
+
   
   // Leitura de Chama
   int flameValue = digitalRead(FLAME_SENSOR_PIN);
-  // Assumindo que LOW = fogo detetado (depende do sensor)
   if (flameValue == LOW) {
     if (!fogoDetectado) {
       fogoDetectado = true;
@@ -125,7 +128,6 @@ void loop() {
   
   // Leitura de Vibração
   int vibValue = digitalRead(VIB_SENSOR_PIN);
-  // Assumindo HIGH = sismo detetado (depende do sensor)
   if (vibValue == HIGH) {
     if (!sismoDetectado) {
       sismoDetectado = true;
