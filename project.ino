@@ -1,3 +1,5 @@
+#include <SoftwareSerial.h> 
+
 // Definição de pinos
 const int LDR_PIN          = A4; // LDR
 const int FLAME_SENSOR_PIN = 2;  // Sensor de chama
