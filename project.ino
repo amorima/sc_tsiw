@@ -1,5 +1,3 @@
-#include <SoftwareSerial.h> // Só usar se precisar de porta Serial extra
-
 // Definição de pinos
 const int LDR_PIN          = A4; // LDR
 const int FLAME_SENSOR_PIN = 2;  // Sensor de chama
@@ -9,11 +7,9 @@ const int BUZZER_PIN       = 9;  // Buzzer
 // LEDs (iluminação pública)
 const int LED_PINS[5]      = {4, 5, 6, 7, 8};
 
-// Pinos do HC-05 ou HC-06 via SoftwareSerial
+// Pinos HC-06
 const int BT_RX = 10; // RX do Arduino (liga no TX do módulo Bluetooth)
 const int BT_TX = 11; // TX do Arduino (liga no RX do módulo Bluetooth)
-
-// Se for usar a Serial padrão (pinos 0 e 1), comente as linhas abaixo e use Serial diretamente.
 SoftwareSerial BTSerial(BT_RX, BT_TX);
 
 // Estados (flags)
@@ -22,14 +18,14 @@ bool sismoDetectado       = false;
 bool fogoDetectado        = false;
 
 // Limites
-const int LUZ_THRESHOLD   = 500; // Valor de corte para o LDR (ajuste se necessário)
+const int LUZ_THRESHOLD   = 500; // Valor de corte para o LDR (ajustar se necessário)
 const int VIB_THRESHOLD   = 100; // (Não está a ser usado diretamente no digital)
 
 // -------------------------------------------------------------------
 // Função para enviar mensagens Bluetooth (e terminar com nova linha)
 void enviarMensagemBT(const String &mensagem) {
   BTSerial.print(mensagem);
-  BTSerial.print("\n");  // Importante para que o app possa ler até '\n'
+  BTSerial.print("\n"); 
 }
 
 // -------------------------------------------------------------------
@@ -116,7 +112,7 @@ void setup() {
   BTSerial.begin(9600);
 
   // Mensagens iniciais
-  enviarMensagemBT("Sistema Iniciado");
+  enviarMensagemBT("Sistema de Gestao Ambiental Iniciado!");
   Serial.println("Sistema de Gestao Ambiental Iniciado!");
 }
 
@@ -136,7 +132,6 @@ void loop() {
 
   // --- 2) Sensor de chama ---
   int flameValue = digitalRead(FLAME_SENSOR_PIN);
-  // Supondo que LOW = chama detetada (depende do sensor)
   if (flameValue == LOW) {
     if (!fogoDetectado) {
       fogoDetectado = true;
@@ -150,12 +145,11 @@ void loop() {
 
   // --- 3) Sensor de vibração ---
   int vibValue = digitalRead(VIB_SENSOR_PIN);
-  // Supondo HIGH = sismo detetado
   if (vibValue == HIGH) {
     if (!sismoDetectado) {
       sismoDetectado = true;
       Serial.println("Possivel sismo detectado!");
-      enviarMensagemBT("Sismo Detectado!");
+      enviarMensagemBT("Possivel sismo detectado!");
       buzzerSomSismo();
     }
   } else {
